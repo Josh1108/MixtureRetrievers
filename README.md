@@ -21,7 +21,7 @@ Despite totaling just 0.8B parameters, this mixture outperforms every individual
 Further analysis also shows that this mixture framework can help incorporate specialized non-oracle \textit{human} information sources as retrievers to achieve good collaboration, with a 58.9\% relative performance improvement over simulated humans alone.
 
 <div style="text-align: center">
-    <img src="figs/framework.jpg" alt="Description of MoR Framework" width="800" height="auto" style="max-width: 100%;">
+    <img src="figs/framework.png" alt="Description of MoR Framework" width="800" height="auto" style="max-width: 100%;">
 </div>
 
 <h2 id="installation">Installation</h2>
