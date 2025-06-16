@@ -51,7 +51,15 @@ Before all, we would suggest setting the current directory as the environment va
 
 A sample fusion run:
 
-```python3 zero-shot-fusion.py --result-dir /data/user_data/jkalra/shared/runs  --dataset-name scifact --qrels-path /home/jkalra/final_repo_directed_Study/MixtureRetrievers/data/scifact/qrels/test.tsv  --ret-merge-method weighted_sum --mixgr-merge-method max --weights-dir /home/jkalra/final_repo_directed_Study/MixtureRetrievers/data/weights/Pre-retrieval-weights ```
+```python 
+python3 zero-shot-fusion.py \
+  --result-dir   /path/to/runs \
+  --dataset-name scifact \
+  --qrels-path   /path/to/scifact/qrels/test.tsv \
+  --ret-merge-method  weighted_sum \
+  --mixgr-merge-method max \
+  --weights-dir /path/to/weights
+```
 
 
 --result-dir – path to the runs root
