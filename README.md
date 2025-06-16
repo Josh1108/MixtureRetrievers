@@ -3,11 +3,11 @@ of Sparse, Dense, and Human Retrievers</h1>
 
 <h4 align="center">
     <p>
-        <a href="">📑 Paper</a> |
+        <!-- <a href="">📑 Paper</a> | -->
         <a href="#installation">🔧 Installation</a> |
         <a href="#resources">📚 Resources</a> |
         <a href="#usage">🚀 Usage</a> |
-        <a href="#citing">📄 Citing</a>
+        <!-- <a href="#citing">📄 Citing</a> -->
     </p>
 </h4>
 
@@ -49,6 +49,26 @@ For the procedure of subquery and proposition generation, please refer to [MixGR
 
 Before all, we would suggest setting the current directory as the environment variable `$ROOT_DIR`. Additionally, corpus indexing and query searching depend on [pyserini](https://github.com/castorini/pyserini).
 
+A sample fusion run:
+
+```python3 zero-shot-fusion.py --result-dir /data/user_data/jkalra/shared/runs  --dataset-name scifact --qrels-path /home/jkalra/final_repo_directed_Study/MixtureRetrievers/data/scifact/qrels/test.tsv  --ret-merge-method weighted_sum --mixgr-merge-method max --weights-dir /home/jkalra/final_repo_directed_Study/MixtureRetrievers/data/weights/Pre-retrieval-weights ```
+
+
+--result-dir – path to the runs root
+Must contain one sub-directory per encoder (e.g., simcse/, dpr/), each holding its *.txt or *.txt.aug run files. Each row in the file must be `<qid> <pid> <score>`
+
+--dataset-name – BEIR dataset key (e.g., scifact, nfcorpus).
+Determines dataset-specific ID parsing.
+
+--qrels-path – absolute path to the test-split qrels.tsv
+
+--ret-merge-method – fusion rule across encoders:
+normalized_sum, weighted_sum, or rrf.
+
+--mixgr-merge-method – intra-encoder mixing rule: 
+max (use the highest score) or mean (average).
+
+--weights-dir – directory holding per-encoder weights
 
 <h2>Contact</h2>
 

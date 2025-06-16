@@ -1,28 +1,10 @@
-"""fusion_eval.py
+"""zero-shot-fusion.py
 ==================
 
 script for loading per‑encoder retrieval results, merging them via
 several fusion strategies, and reporting **NDCG@5/20** with BEIR’s
 `EvaluateRetrieval` utility.
 
-Major features
---------------
-* Works with *chunk* vs *prop* document IDs and whole vs sub‑queries.
-* Supports **max/mean** internal score merges, then **RRF / weighted‑sum /
-  normalized‑sum** cross‑encoder fusion.
-* Weight files are read from the *MixGR* JSON format and aligned per‑query.
-
-Usage example
--------------
-```bash
-python zero_shot_fusion.py \
-  --result-dir /path/to/outputs \
-  --dataset-name scifact \
-  --qrels-path /path/to/scifact/qrels/test.tsv \
-  --ret-merge-method normalized_sum \
-  --mixgr-merge-method max \
-  --weights-dir /path/to/kb_weights
-```
 """
 import os
 import pandas as pd
@@ -86,6 +68,47 @@ def get_metrics(
     return ndcg5, ndcg20
 
 
+def _read_result_records(path: Path) -> Iterable[Tuple[str, str, float]]:
+    """Yield `(qid, pid, score)` triples from BEIR run files.
+
+    * **Tab‑separated `*.txt.aug`** produced by MixGR (may lack a header).
+    * **TREC run `*.txt`** – six‑column space‑/tab‑separated format.
+    Any unrecognised file is silently skipped by the caller.
+    """
+    name = path.name
+
+    # ── MixGR tab‑separated format ────────────────────────────────────────
+    if name.endswith(".txt.aug"):
+        with path.open() as fh:
+            first = fh.readline().strip().lower()
+        header = 0 if first.startswith("qid") else None
+        df = pd.read_csv(
+            path,
+            sep="\t",
+            header=header,
+            names=["qid", "pid", "score"],
+            usecols=[0, 1, 2],
+        )
+        df["score"] = pd.to_numeric(df["score"], errors="coerce")
+        df = df.dropna(subset=["score"])
+    # ── Standard TREC six‑column run file ────────────────────────────────
+    if name.endswith(".txt"):
+        # Format: qid Q0 docid rank score tag
+        df = pd.read_csv(
+            path,
+            delim_whitespace=True,  # handles spaces *and* tabs
+            header=None,
+            usecols=[0, 2, 4],
+            names=["qid", "pid", "score"],
+        )
+        for qid, pid, score in df.itertuples(index=False, name=None):
+            yield str(qid), str(pid), float(score)
+        return
+
+    # ── Not a recognised run file ────────────────────────────────────────
+    logging.debug("Skipping non‑run file: %s", path)
+    return  # silently ignore
+    
 def _aggregate_scores(
     encoder_qid_pid_score: Mapping[str, Mapping[str, Mapping[str, float]]],
     dataset_name: str,
@@ -146,9 +169,8 @@ def load_all_result_files(
             if fp.name in {"rrf", "log"} or fp.suffix == ".log":
                 continue
             for qid, pid, score in _read_result_records(fp):
-                enc_qid_pid[enc].setdefault(qid, {})[pid] = max(
-                    score, enc_qid_pid[enc][qid].get(pid, float("-inf"))
-                )
+                sub = enc_qid_pid[enc].setdefault(qid, {})
+                sub[pid] = max(score, sub.get(pid, float("-inf")))
 
     return _aggregate_scores(enc_qid_pid, dataset_name, merge_method)
 
