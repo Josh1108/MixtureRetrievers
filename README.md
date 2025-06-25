@@ -7,7 +7,7 @@ of Sparse, Dense, and Human Retrievers</h1>
         <a href="#installation">🔧 Installation</a> |
         <a href="#resources">📚 Resources</a> |
         <a href="#usage">🚀 Usage</a> |
-        <!-- <a href="#citing">📄 Citing</a> -->
+        <a href="#citation">📄 Citation</a>
     </p>
 </h4>
 
@@ -85,3 +85,17 @@ This repository contains experimental software intended to provide supplementary
 <h2>Licence</h2>
 
 The software in this repocitory is licensed under the Apache License, Version 2.0. See [LICENSE](LICENCE) for the full license text.
+
+<h2 id="citing">Citation</h2>
+
+```
+@misc{kalra2025morbetterhandlingdiverse,
+      title={MoR: Better Handling Diverse Queries with a Mixture of Sparse, Dense, and Human Retrievers}, 
+      author={Jushaan Singh Kalra and Xinran Zhao and To Eun Kim and Fengyu Cai and Fernando Diaz and Tongshuang Wu},
+      year={2025},
+      eprint={2506.15862},
+      archivePrefix={arXiv},
+      primaryClass={cs.IR},
+      url={https://arxiv.org/abs/2506.15862}, 
+}
+```
