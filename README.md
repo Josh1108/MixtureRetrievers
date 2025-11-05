@@ -141,51 +141,18 @@ results = retriever.search(
 retriever.cleanup()  # Clean up temporary files
 ```
 
-**Example 2: Using Context Manager**
-```python
-with MixtureRetriever(
-    retrievers=["all-mpnet-base-v2"],
-    use_pre_weights=False
-) as retriever:
-    results = retriever.search(
-        queries=["How does X work?"],
-        documents=["X is...", "X works by...", ...],
-        top_k=10
-    )
-    # Automatic cleanup when exiting context
-```
-
-**Example 3: With Threshold Filtering**
-```python
-retriever = MixtureRetriever(
-    retrievers=["all-mpnet-base-v2", "bm25", "facebook-dpr-ctx_encoder-multiset-base"],
-    use_pre_weights=True,
-    pre_weight_threshold=0.1,  # Only use retrievers with weight >= 0.1
-    weight_norm="softmax"
-)
-
-results = retriever.search(
-    queries=["Your queries here"],
-    documents=["Your documents here"],
-    top_k=10,
-    return_scores=True,
-    return_texts=True
-)
-```
 
 ### Available Retrievers
 
-**Sentence Transformers**: `all-mpnet-base-v2` (recommended), `sentence-transformers/all-MiniLM-L6-v2`, `sentence-transformers/all-MiniLM-L12-v2`, `sentence-transformers/multi-qa-MiniLM-L6-cos-v1`, `sentence-transformers/multi-qa-mpnet-base-dot-v1`, `BAAI/bge-small-en-v1.5`, `BAAI/bge-base-en-v1.5`
+**Sentence Transformers**: `all-mpnet-base-v2` (recommended), `simcse`, `contriever`, `ance`, `gtr-t5-base`, and all other HF models
 
-**DPR Models**: `facebook-dpr-ctx_encoder-multiset-base`, `facebook/dpr-ctx_encoder-single-nq-base`
 
 **Sparse Retrievers**: `bm25`
 
-**Aliases**: `mpnet` → `all-mpnet-base-v2`, `dpr` → DPR models, `simcse`, `contriever`, `ance`, `gtr-t5-base`
 
 ### Advanced Usage
 
-For more advanced usage with existing datasets and evaluation, see `run_scifact.py` and `example_usage.py` for detailed examples.
+For more advanced usage with existing datasets and evaluation, see `run_scifact.py` for detailed examples.
 
 <h2>Contact</h2>
 
