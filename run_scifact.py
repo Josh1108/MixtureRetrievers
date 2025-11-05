@@ -15,7 +15,7 @@ def main():
     ap = argparse.ArgumentParser()
     # Point to the FOLDER containing corpus.chunk.jsonl (and maybe corpus.prop.jsonl)
     ap.add_argument("--corpus_dir", default=f"data/{DATASET}/corpus", help="Folder with corpus.chunk.jsonl (and optional corpus.prop.jsonl)")
-    ap.add_argument("--queries", default=f"data/{DATASET}/query/queries.whole.jsonl", help="Queries .jsonl with {id,title}")
+    ap.add_argument("--queries", default=f"data/{DATASET}/queries/queries.whole.jsonl", help="Queries .jsonl with {id,title}")
     ap.add_argument("--output_root", default="/data/user_data/jkalra/indexes", help="Where indexes & runs are stored")
     ap.add_argument("--top_k", type=int, default=100)
     ap.add_argument("--batch_size", type=int, default=128)
@@ -34,7 +34,6 @@ def main():
     # ---- encoders to run
     encoders: List[str] = [
         "all-mpnet-base-v2",                    # MPNet base v2
-        "facebook-dpr-ctx_encoder-multiset-base"  # DPR ctx (SBERT-ready id)
     ]
     if args.with_bm25:
         encoders = ["bm25"] + encoders

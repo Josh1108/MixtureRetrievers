@@ -2,11 +2,11 @@ from pathlib import Path
 from core.pre_retrieval_weights import compute_pre_weights
 
 # --- EDIT THESE ---
-DATASET_DIR = Path("/data/user_data/jkalra/indexes/nfcorpus")                     # e.g. indexes/scifact
+DATASET_DIR = Path("/data/user_data/jkalra/indexes/scifact")                     # e.g. indexes/scifact
 RUNS_DIR    = DATASET_DIR / "runs"
 OUT_DIR     = DATASET_DIR / "weights"
-QUERIES     = Path("/home/jkalra/final_repo_directed_Study/MixtureRetrievers/data/nfcorpus/queries/queries.whole.jsonl")
-SUBQUERIES  = Path("/home/jkalra/final_repo_directed_Study/MixtureRetrievers/data/nfcorpus/queries/queries.multi.jsonl")                                       # optional, leave blank if not used
+QUERIES     = Path("/home/jkalra/final_repo_directed_Study/MixtureRetrievers/data/scifact/queries/queries.whole.jsonl")
+SUBQUERIES  = Path("/home/jkalra/final_repo_directed_Study/MixtureRetrievers/data/scifact/queries/queries.multi.jsonl")                                       # optional, leave blank if not used
 DEFAULT_EMB = "na"
 TRAIN_SAMPLE = None                                          # e.g., 5000
 ENC_OVERRIDES = None                                         # e.g., Path("enc_overrides.yaml")

@@ -47,36 +47,145 @@ For the procedure of subquery and proposition generation, please refer to [MixGR
 
 <h2 id="usage">Usage</h2>
 
-Before all, we would suggest setting the current directory as the environment variable `$ROOT_DIR`. Additionally, corpus indexing and query searching depend on [pyserini](https://github.com/castorini/pyserini).
+### Quick Start with MixtureRetriever
 
-A sample fusion run:
+`MixtureRetriever` provides a simple, non-technical interface for running retrieval on your own queries and documents using multiple retrieval methods.
 
-```python 
-python3 zero-shot-fusion.py \
-  --result-dir   /path/to/runs \
-  --dataset-name scifact \
-  --qrels-path   /path/to/scifact/qrels/test.tsv \
-  --ret-merge-method  weighted_sum \
-  --mixgr-merge-method max \
-  --weights-dir /path/to/weights
+```python
+from mixture_retriever import MixtureRetriever
+
+# Initialize retriever
+retriever = MixtureRetriever(
+    retrievers=["all-mpnet-base-v2", "bm25"],
+    use_pre_weights=True,
+    pre_weight_threshold=0.1
+)
+
+# Your queries
+queries = [
+    "What is machine learning?",
+    "How do neural networks work?",
+]
+
+# Your documents
+documents = [
+    "Machine learning is a subset of AI...",
+    "Neural networks are computational models...",
+    "Deep learning uses multiple layers...",
+]
+
+# Search
+results = retriever.search(
+    queries=queries,
+    documents=documents,
+    top_k=10
+)
+
+# Print results
+for result in results:
+    print(f"Query: {result['query']}")
+    for r in result['results']:
+        print(f"  [{r['rank']}] {r['text']}")
 ```
 
+### Features
 
---result-dir – path to the runs root
-Must contain one sub-directory per encoder (e.g., simcse/, dpr/), each holding its *.txt or *.txt.aug run files. Each row in the file must be `<qid> <pid> <score>`
+**Multiple Retrieval Methods**: Combine different retrieval approaches (dense retrievers like sentence transformers, DPR models, and sparse retrievers like BM25).
 
---dataset-name – BEIR dataset key (e.g., scifact, nfcorpus).
-Determines dataset-specific ID parsing.
+**Pre-Retrieval Weighting**: Automatically compute and apply weights to different retrievers based on query characteristics, with optional threshold filtering and normalization.
 
---qrels-path – absolute path to the test-split qrels.tsv
+**Automatic Fusion**: Results from multiple retrievers are automatically merged using pre-retrieval weights, score normalization, and final ranking.
 
---ret-merge-method – fusion rule across encoders:
-normalized_sum, weighted_sum, or rrf.
+### Configuration Options
 
---mixgr-merge-method – intra-encoder mixing rule: 
-max (use the highest score) or mean (average).
+**Basic Options**:
+```python
+retriever = MixtureRetriever(
+    retrievers=["all-mpnet-base-v2", "bm25"],  # Which methods to use
+    use_pre_weights=True,                        # Enable pre-retrieval weighting
+    verbose=True                                 # Show progress messages
+)
+```
 
---weights-dir – directory holding per-encoder weights
+**Advanced Options**:
+```python
+retriever = MixtureRetriever(
+    retrievers=["all-mpnet-base-v2", "bm25"],
+    use_pre_weights=True,                    # Enable pre-retrieval weights
+    pre_weight_threshold=0.1,                # Filter retrievers with weight < 0.1
+    weight_norm="softmax",                    # "none", "softmax", or "minmax"
+    softmax_temp=1.0,                         # Temperature for softmax
+    index_type="flat",                        # "flat", "ivf", or "hnsw"
+    batch_size=128,                           # Batch size for encoding
+    build_props=True,                         # Build proposition-level indexes
+)
+```
+
+### Usage Examples
+
+**Example 1: Basic Usage**
+```python
+from mixture_retriever import MixtureRetriever
+
+retriever = MixtureRetriever(
+    retrievers=["all-mpnet-base-v2", "bm25"],
+    use_pre_weights=True
+)
+
+results = retriever.search(
+    queries=["What is AI?"],
+    documents=["AI is...", "Machine learning...", ...],
+    top_k=5
+)
+
+retriever.cleanup()  # Clean up temporary files
+```
+
+**Example 2: Using Context Manager**
+```python
+with MixtureRetriever(
+    retrievers=["all-mpnet-base-v2"],
+    use_pre_weights=False
+) as retriever:
+    results = retriever.search(
+        queries=["How does X work?"],
+        documents=["X is...", "X works by...", ...],
+        top_k=10
+    )
+    # Automatic cleanup when exiting context
+```
+
+**Example 3: With Threshold Filtering**
+```python
+retriever = MixtureRetriever(
+    retrievers=["all-mpnet-base-v2", "bm25", "facebook-dpr-ctx_encoder-multiset-base"],
+    use_pre_weights=True,
+    pre_weight_threshold=0.1,  # Only use retrievers with weight >= 0.1
+    weight_norm="softmax"
+)
+
+results = retriever.search(
+    queries=["Your queries here"],
+    documents=["Your documents here"],
+    top_k=10,
+    return_scores=True,
+    return_texts=True
+)
+```
+
+### Available Retrievers
+
+**Sentence Transformers**: `all-mpnet-base-v2` (recommended), `sentence-transformers/all-MiniLM-L6-v2`, `sentence-transformers/all-MiniLM-L12-v2`, `sentence-transformers/multi-qa-MiniLM-L6-cos-v1`, `sentence-transformers/multi-qa-mpnet-base-dot-v1`, `BAAI/bge-small-en-v1.5`, `BAAI/bge-base-en-v1.5`
+
+**DPR Models**: `facebook-dpr-ctx_encoder-multiset-base`, `facebook/dpr-ctx_encoder-single-nq-base`
+
+**Sparse Retrievers**: `bm25`
+
+**Aliases**: `mpnet` → `all-mpnet-base-v2`, `dpr` → DPR models, `simcse`, `contriever`, `ance`, `gtr-t5-base`
+
+### Advanced Usage
+
+For more advanced usage with existing datasets and evaluation, see `run_scifact.py` and `example_usage.py` for detailed examples.
 
 <h2>Contact</h2>
 
