@@ -47,36 +47,112 @@ For the procedure of subquery and proposition generation, please refer to [MixGR
 
 <h2 id="usage">Usage</h2>
 
-Before all, we would suggest setting the current directory as the environment variable `$ROOT_DIR`. Additionally, corpus indexing and query searching depend on [pyserini](https://github.com/castorini/pyserini).
+### Quick Start with MixtureRetriever
 
-A sample fusion run:
+`MixtureRetriever` provides a simple interface for running retrieval on your own queries and documents using multiple retrieval methods.
 
-```python 
-python3 zero-shot-fusion.py \
-  --result-dir   /path/to/runs \
-  --dataset-name scifact \
-  --qrels-path   /path/to/scifact/qrels/test.tsv \
-  --ret-merge-method  weighted_sum \
-  --mixgr-merge-method max \
-  --weights-dir /path/to/weights
+```python
+from mixture_retriever import MixtureRetriever
+
+# Initialize retriever
+retriever = MixtureRetriever(
+    retrievers=["all-mpnet-base-v2", "bm25"],
+    use_pre_weights=True,
+    pre_weight_threshold=0.1
+)
+
+# Your queries
+queries = [
+    "What is machine learning?",
+    "How do neural networks work?",
+]
+
+# Your documents
+documents = [
+    "Machine learning is a subset of AI...",
+    "Neural networks are computational models...",
+    "Deep learning uses multiple layers...",
+]
+
+# Search
+results = retriever.search(
+    queries=queries,
+    documents=documents,
+    top_k=10
+)
+
+# Print results
+for result in results:
+    print(f"Query: {result['query']}")
+    for r in result['results']:
+        print(f"  [{r['rank']}] {r['text']}")
+```
+
+### Features
+
+**Multiple Retrieval Methods**: Combine different retrieval approaches (dense retrievers like sentence transformers, DPR models, and sparse retrievers like BM25).
+
+**Pre-Retrieval Weighting**: Automatically compute and apply weights to different retrievers based on query characteristics, with optional threshold filtering and normalization.
+
+**Automatic Fusion**: Results from multiple retrievers are automatically merged using pre-retrieval weights, score normalization, and final ranking.
+
+### Configuration Options
+
+**Basic Options**:
+```python
+retriever = MixtureRetriever(
+    retrievers=["all-mpnet-base-v2", "bm25"],  # Which methods to use
+    use_pre_weights=True,                        # Enable pre-retrieval weighting
+    verbose=True                                 # Show progress messages
+)
+```
+
+**Advanced Options**:
+```python
+retriever = MixtureRetriever(
+    retrievers=["all-mpnet-base-v2", "bm25"],
+    use_pre_weights=True,                    # Enable pre-retrieval weights
+    pre_weight_threshold=0.1,                # Filter retrievers with weight < 0.1
+    weight_norm="softmax",                    # "none", "softmax", or "minmax"
+    softmax_temp=1.0,                         # Temperature for softmax
+    index_type="flat",                        # "flat", "ivf", or "hnsw"
+    batch_size=128,                           # Batch size for encoding
+    build_props=True,                         # Build proposition-level indexes
+)
+```
+
+### Usage Examples
+
+**Example 1: Basic Usage**
+```python
+from mixture_retriever import MixtureRetriever
+
+retriever = MixtureRetriever(
+    retrievers=["all-mpnet-base-v2", "bm25"],
+    use_pre_weights=True
+)
+
+results = retriever.search(
+    queries=["What is AI?"],
+    documents=["AI is...", "Machine learning...", ...],
+    top_k=5
+)
+
+retriever.cleanup()  # Clean up temporary files
 ```
 
 
---result-dir – path to the runs root
-Must contain one sub-directory per encoder (e.g., simcse/, dpr/), each holding its *.txt or *.txt.aug run files. Each row in the file must be `<qid> <pid> <score>`
+### Available Retrievers
 
---dataset-name – BEIR dataset key (e.g., scifact, nfcorpus).
-Determines dataset-specific ID parsing.
+**Sentence Transformers**: `all-mpnet-base-v2` (recommended), `simcse`, `contriever`, `ance`, `gtr-t5-base`, and all other HF models
 
---qrels-path – absolute path to the test-split qrels.tsv
 
---ret-merge-method – fusion rule across encoders:
-normalized_sum, weighted_sum, or rrf.
+**Sparse Retrievers**: `bm25`
 
---mixgr-merge-method – intra-encoder mixing rule: 
-max (use the highest score) or mean (average).
 
---weights-dir – directory holding per-encoder weights
+### Advanced Usage
+
+For more advanced usage with existing datasets and evaluation, see `run_scifact.py` for detailed examples.
 
 <h2>Contact</h2>
 
