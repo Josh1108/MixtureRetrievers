@@ -49,7 +49,7 @@ For the procedure of subquery and proposition generation, please refer to [MixGR
 
 ### Quick Start with MixtureRetriever
 
-`MixtureRetriever` provides a simple, non-technical interface for running retrieval on your own queries and documents using multiple retrieval methods.
+`MixtureRetriever` provides a simple interface for running retrieval on your own queries and documents using multiple retrieval methods.
 
 ```python
 from mixture_retriever import MixtureRetriever
